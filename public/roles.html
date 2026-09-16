@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roles & Permissions - Unified Systems Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo-icon">U</div>
+        <div class="sidebar-title">Unified Systems</div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html" class="nav-link">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Dashboard
+        </a>
+
+        <div id="admin-nav-section">
+          <div class="nav-section-title">Administration</div>
+          <a href="/users.html" class="nav-link">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            Users
+          </a>
+          <a href="/roles.html" class="nav-link active">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            Roles & Permissions
+          </a>
+          <a href="/systems.html" class="nav-link">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            System Registry
+          </a>
+          <a href="/audit.html" class="nav-link">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Audit Logs
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button onclick="Auth.logout()" class="btn btn-secondary btn-sm" style="width: 100%; border: 1px solid #334155; background: #1e293b; color: #cbd5e1;">
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="page-title">Roles & Access Control</div>
+        <div class="user-profile">
+          <div class="user-info">
+            <div class="user-name" id="topbar-user-name">-</div>
+            <div class="user-role-badge" id="topbar-user-role">-</div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content-area">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px;">
+          <div>
+            <h2 style="font-size: 1.35rem; font-weight: 600;">Configurable RBAC Roles</h2>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">
+              Define organization roles and granular permissions for portal capabilities and system access.
+            </p>
+          </div>
+          <button onclick="openRoleModal()" class="btn btn-primary" id="btn-create-role">
+            + Create New Role
+          </button>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Role Name</th>
+                <th>Description</th>
+                <th>Permissions Count</th>
+                <th>Type</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="roles-tbody">
+              <!-- Loaded dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Role Modal -->
+  <div class="modal-overlay" id="role-modal">
+    <div class="modal-dialog" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-role-title">Create Role</h3>
+        <button class="modal-close" onclick="closeRoleModal()">&times;</button>
+      </div>
+      <form id="role-form">
+        <input type="hidden" id="role-id">
+        <div class="form-group">
+          <label class="form-label">Role Name</label>
+          <input type="text" id="role-name" class="form-control" placeholder="e.g. Field Operations Lead" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="role-desc" class="form-control" rows="2" placeholder="Responsibilities and scope"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Permissions</label>
+          <div id="permissions-container" style="max-height: 240px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; background: #fafafa; display: flex; flex-direction: column; gap: 8px;">
+            <!-- Loaded dynamically -->
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeRoleModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-role">Save Role</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    let rolesList = [];
+    let availablePermissions = [];
+
+    async function loadPermissions() {
+      try {
+        const res = await Auth.apiRequest('/api/roles/available-permissions');
+        const data = await res.json();
+        if (data.success) {
+          availablePermissions = data.permissions;
+        }
+      } catch (e) {
+        console.error('Failed to load permissions list:', e);
+      }
+    }
+
+    async function loadRoles() {
+      const tbody = document.getElementById('roles-tbody');
+      try {
+        const res = await Auth.apiRequest('/api/roles');
+        const data = await res.json();
+        if (data.success) {
+          rolesList = data.roles;
+          tbody.innerHTML = '';
+          data.roles.forEach(r => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td style="font-weight: 600;">${r.name}</td>
+              <td style="color: var(--text-sub);">${r.description || '-'}</td>
+              <td><span style="background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.78rem;">${r.permissions?.length || 0} permissions</span></td>
+              <td><span class="badge ${r.isSystemRole ? 'badge-active' : 'badge-inactive'}">${r.isSystemRole ? 'System Built-in' : 'Custom'}</span></td>
+              <td style="text-align: right;">
+                <button class="btn btn-secondary btn-sm" onclick="editRole('${r._id}')">Edit</button>
+                ${!r.isSystemRole ? `<button class="btn btn-danger btn-sm" onclick="deleteRole('${r._id}')" style="margin-left: 6px;">Delete</button>` : ''}
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } catch (e) {
+        console.error('Failed to load roles:', e);
+      }
+    }
+
+    function renderPermissionCheckboxes(selectedPermissions = []) {
+      const container = document.getElementById('permissions-container');
+      container.innerHTML = '';
+      availablePermissions.forEach(p => {
+        const label = document.createElement('label');
+        label.style.display = 'flex';
+        label.style.alignItems = 'center';
+        label.style.gap = '8px';
+        label.style.fontSize = '0.84rem';
+        label.style.cursor = 'pointer';
+
+        const isChecked = selectedPermissions.includes(p.code) || selectedPermissions.includes('*');
+        label.innerHTML = `
+          <input type="checkbox" name="perm" value="${p.code}" ${isChecked ? 'checked' : ''}>
+          <span><strong>${p.name}</strong> <code style="color: #64748b; font-size: 0.76rem;">(${p.code})</code></span>
+        `;
+        container.appendChild(label);
+      });
+    }
+
+    function openRoleModal() {
+      document.getElementById('role-id').value = '';
+      document.getElementById('role-form').reset();
+      renderPermissionCheckboxes([]);
+      document.getElementById('modal-role-title').textContent = 'Create New Role';
+      document.getElementById('role-modal').classList.add('active');
+    }
+
+    function closeRoleModal() {
+      document.getElementById('role-modal').classList.remove('active');
+    }
+
+    function editRole(id) {
+      const r = rolesList.find(x => x._id === id);
+      if (!r) return;
+      document.getElementById('role-id').value = r._id;
+      document.getElementById('role-name').value = r.name;
+      document.getElementById('role-desc').value = r.description || '';
+      renderPermissionCheckboxes(r.permissions || []);
+      document.getElementById('modal-role-title').textContent = 'Edit Role: ' + r.name;
+      document.getElementById('role-modal').classList.add('active');
+    }
+
+    async function deleteRole(id) {
+      if (!confirm('Are you sure you want to delete this custom role?')) return;
+      try {
+        const res = await Auth.apiRequest(`/api/roles/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) {
+          loadRoles();
+        } else {
+          alert(data.message || 'Failed to delete role');
+        }
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    document.getElementById('role-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('role-id').value;
+      const checkedBoxes = Array.from(document.querySelectorAll('#permissions-container input[name="perm"]:checked'));
+      const permissions = checkedBoxes.map(b => b.value);
+
+      const payload = {
+        name: document.getElementById('role-name').value,
+        description: document.getElementById('role-desc').value,
+        permissions,
+      };
+
+      const url = id ? `/api/roles/${id}` : '/api/roles';
+      const method = id ? 'PUT' : 'POST';
+
+      try {
+        const res = await Auth.apiRequest(url, {
+          method,
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (data.success) {
+          closeRoleModal();
+          loadRoles();
+        } else {
+          alert(data.message || 'Operation failed');
+        }
+      } catch (err) {
+        alert('Error saving role: ' + err.message);
+      }
+    });
+
+    (async function init() {
+      const user = await Auth.checkAuthStatus();
+      if (!user) {
+        window.location.href = '/index.html';
+        return;
+      }
+      Auth.renderUserNav();
+      await loadPermissions();
+      await loadRoles();
+    })();
+  </script>
+</body>
+</html>

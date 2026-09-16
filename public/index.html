@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Unified Systems Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="login-body">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-brand-icon" id="org-logo-icon">U</div>
+      <h1 class="login-title" id="org-portal-title">Unified Systems Portal</h1>
+      <p class="login-subtitle">Single Entry Point for Enterprise Business Applications</p>
+    </div>
+
+    <div id="login-alert" class="alert alert-danger" role="alert"></div>
+
+    <form id="login-form">
+      <div class="form-group">
+        <label for="email" class="form-label">Email Address</label>
+        <input type="email" id="email" class="form-control" placeholder="name@company.com" required autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" id="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" id="btn-login" class="btn btn-primary" style="width: 100%; margin-top: 8px;">
+        Sign In
+      </button>
+    </form>
+
+    <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 0.78rem; color: var(--text-muted); text-align: center;">
+      Enterprise Single Entry Shell • Secure RBAC
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    // Redirect if already logged in
+    (async function() {
+      const user = await Auth.checkAuthStatus();
+      if (user) {
+        window.location.href = '/dashboard.html';
+      }
+
+      // Fetch org title if available
+      try {
+        const res = await fetch('/api/organization');
+        const data = await res.json();
+        if (data.success && data.organization) {
+          if (data.organization.branding?.portalTitle) {
+            document.getElementById('org-portal-title').textContent = data.organization.branding.portalTitle;
+            document.title = `Login - ${data.organization.branding.portalTitle}`;
+          }
+          if (data.organization.shortName) {
+            document.getElementById('org-logo-icon').textContent = data.organization.shortName.charAt(0);
+          }
+        }
+      } catch (e) {}
+    })();
+
+    const loginForm = document.getElementById('login-form');
+    const alertBox = document.getElementById('login-alert');
+    const btnLogin = document.getElementById('btn-login');
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alertBox.style.display = 'none';
+      btnLogin.disabled = true;
+      btnLogin.textContent = 'Authenticating...';
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          Auth.setToken(data.token);
+          Auth.setUser(data.user);
+          window.location.href = '/dashboard.html';
+        } else {
+          alertBox.textContent = data.message || 'Login failed. Please check your credentials.';
+          alertBox.style.display = 'block';
+        }
+      } catch (err) {
+        alertBox.textContent = 'Server communication error. Please try again later.';
+        alertBox.style.display = 'block';
+      } finally {
+        btnLogin.disabled = false;
+        btnLogin.textContent = 'Sign In';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>System Registry - Unified Systems Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo-icon">U</div>
+        <div class="sidebar-title">Unified Systems</div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html" class="nav-link">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Dashboard
+        </a>
+
+        <div id="admin-nav-section">
+          <div class="nav-section-title">Administration</div>
+          <a href="/users.html" class="nav-link">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            Users
+          </a>
+          <a href="/roles.html" class="nav-link">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            Roles & Permissions
+          </a>
+          <a href="/systems.html" class="nav-link active">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            System Registry
+          </a>
+          <a href="/audit.html" class="nav-link">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Audit Logs
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button onclick="Auth.logout()" class="btn btn-secondary btn-sm" style="width: 100%; border: 1px solid #334155; background: #1e293b; color: #cbd5e1;">
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="page-title">System & Module Registry</div>
+        <div class="user-profile">
+          <div class="user-info">
+            <div class="user-name" id="topbar-user-name">-</div>
+            <div class="user-role-badge" id="topbar-user-role">-</div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content-area">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px;">
+          <div>
+            <h2 style="font-size: 1.35rem; font-weight: 600;">Registered Business Modules</h2>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">
+              Register and configure external enterprise applications without modifying their source code.
+            </p>
+          </div>
+          <button onclick="openSystemModal()" class="btn btn-primary" id="btn-register-system">
+            + Register New System
+          </button>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>System Name</th>
+                <th>Slug</th>
+                <th>Target URL</th>
+                <th>Category</th>
+                <th>Required Permission</th>
+                <th>Status</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="systems-tbody">
+              <!-- Loaded dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- System Modal -->
+  <div class="modal-overlay" id="system-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-system-title">Register System</h3>
+        <button class="modal-close" onclick="closeSystemModal()">&times;</button>
+      </div>
+      <form id="system-form">
+        <input type="hidden" id="system-id">
+        <div class="form-group">
+          <label class="form-label">System Name</label>
+          <input type="text" id="system-name" class="form-control" placeholder="e.g. Supply PMS" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Slug (Identifier)</label>
+          <input type="text" id="system-slug" class="form-control" placeholder="e.g. supply-pms" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Target URL</label>
+          <input type="url" id="system-url" class="form-control" placeholder="https://supply.company.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category</label>
+          <input type="text" id="system-category" class="form-control" placeholder="e.g. Supply & Logistics">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea id="system-desc" class="form-control" rows="2" placeholder="Brief summary of this operational system"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select id="system-status" class="form-control">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="maintenance">Maintenance</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeSystemModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-system">Save System</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    let systemsList = [];
+
+    async function loadSystems() {
+      const tbody = document.getElementById('systems-tbody');
+      try {
+        const res = await Auth.apiRequest('/api/systems');
+        const data = await res.json();
+        if (data.success) {
+          systemsList = data.systems;
+          tbody.innerHTML = '';
+          data.systems.forEach(sys => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td style="font-weight: 600;">${sys.name}</td>
+              <td><code>${sys.slug}</code></td>
+              <td><a href="${sys.url}" target="_blank" style="color: var(--primary); text-decoration: none;">${sys.url}</a></td>
+              <td>${sys.category || '-'}</td>
+              <td><span style="font-size: 0.78rem; background: #f1f5f9; padding: 2px 6px; border-radius: 4px;">${sys.requiredPermission || sys.slug + '.access'}</span></td>
+              <td><span class="badge ${sys.status === 'active' ? 'badge-active' : 'badge-inactive'}">● ${sys.status}</span></td>
+              <td style="text-align: right;">
+                <button class="btn btn-secondary btn-sm" onclick="editSystem('${sys._id}')">Edit</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } catch (e) {
+        console.error('Failed to load systems:', e);
+      }
+    }
+
+    function openSystemModal() {
+      document.getElementById('system-id').value = '';
+      document.getElementById('system-form').reset();
+      document.getElementById('modal-system-title').textContent = 'Register New System';
+      document.getElementById('system-modal').classList.add('active');
+    }
+
+    function closeSystemModal() {
+      document.getElementById('system-modal').classList.remove('active');
+    }
+
+    function editSystem(id) {
+      const sys = systemsList.find(s => s._id === id);
+      if (!sys) return;
+      document.getElementById('system-id').value = sys._id;
+      document.getElementById('system-name').value = sys.name;
+      document.getElementById('system-slug').value = sys.slug;
+      document.getElementById('system-url').value = sys.url;
+      document.getElementById('system-category').value = sys.category || '';
+      document.getElementById('system-desc').value = sys.description || '';
+      document.getElementById('system-status').value = sys.status;
+      document.getElementById('modal-system-title').textContent = 'Edit System: ' + sys.name;
+      document.getElementById('system-modal').classList.add('active');
+    }
+
+    document.getElementById('system-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('system-id').value;
+      const payload = {
+        name: document.getElementById('system-name').value,
+        slug: document.getElementById('system-slug').value,
+        url: document.getElementById('system-url').value,
+        category: document.getElementById('system-category').value,
+        description: document.getElementById('system-desc').value,
+        status: document.getElementById('system-status').value,
+      };
+
+      const url = id ? `/api/systems/${id}` : '/api/systems';
+      const method = id ? 'PUT' : 'POST';
+
+      try {
+        const res = await Auth.apiRequest(url, {
+          method,
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (data.success) {
+          closeSystemModal();
+          loadSystems();
+        } else {
+          alert(data.message || 'Operation failed');
+        }
+      } catch (err) {
+        alert('Error saving system: ' + err.message);
+      }
+    });
+
+    (async function init() {
+      const user = await Auth.checkAuthStatus();
+      if (!user) {
+        window.location.href = '/index.html';
+        return;
+      }
+      Auth.renderUserNav();
+      loadSystems();
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Unified Systems Portal</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo-icon" id="sidebar-logo">U</div>
+        <div class="sidebar-title" id="sidebar-title">Unified Systems</div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/dashboard.html" class="nav-link active">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Dashboard
+        </a>
+
+        <div class="nav-section-title">Systems</div>
+        <div id="sidebar-systems-list" style="display: flex; flex-direction: column; gap: 4px;">
+          <!-- Dynamically populated permitted systems -->
+        </div>
+
+        <div id="admin-nav-section">
+          <div class="nav-section-title">Administration</div>
+          <a href="/users.html" class="nav-link" id="nav-users">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            Users
+          </a>
+          <a href="/roles.html" class="nav-link" id="nav-roles">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            Roles & Permissions
+          </a>
+          <a href="/systems.html" class="nav-link" id="nav-systems">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            System Registry
+          </a>
+          <a href="/audit.html" class="nav-link" id="nav-audit">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Audit Logs
+          </a>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button onclick="Auth.logout()" class="btn btn-secondary btn-sm" style="width: 100%; border: 1px solid #334155; background: #1e293b; color: #cbd5e1;">
+          Sign Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Section -->
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="page-title">Enterprise Dashboard</div>
+        <div class="user-profile">
+          <div class="user-info">
+            <div class="user-name" id="topbar-user-name">-</div>
+            <div class="user-role-badge" id="topbar-user-role">-</div>
+          </div>
+        </div>
+      </header>
+
+      <main class="content-area">
+        <div style="margin-bottom: 24px;">
+          <h2 style="font-size: 1.35rem; font-weight: 600;">Available Business Systems</h2>
+          <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 4px;">
+            Select an authorized enterprise system below to access its operational environment.
+          </p>
+        </div>
+
+        <div id="empty-systems" style="display: none; background: white; border: 1px dashed var(--border); border-radius: var(--radius-lg); padding: 48px; text-align: center; color: var(--text-muted);">
+          No systems currently assigned to your account. Please reach out to your administrator to request access.
+        </div>
+
+        <div class="cards-grid" id="systems-grid">
+          <!-- Dynamically populated system cards -->
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="/js/auth.js"></script>
+  <script>
+    (async function initDashboard() {
+      const user = await Auth.checkAuthStatus();
+      if (!user) {
+        window.location.href = '/index.html';
+        return;
+      }
+
+      Auth.renderUserNav();
+
+      // Load systems authorized for this user
+      try {
+        const res = await Auth.apiRequest('/api/systems/my-systems');
+        const data = await res.json();
+
+        const grid = document.getElementById('systems-grid');
+        const sidebarList = document.getElementById('sidebar-systems-list');
+        const emptyState = document.getElementById('empty-systems');
+
+        if (data.success && Array.isArray(data.systems) && data.systems.length > 0) {
+          grid.innerHTML = '';
+          sidebarList.innerHTML = '';
+
+          data.systems.forEach((sys) => {
+            // Add to sidebar
+            const sideItem = document.createElement('a');
+            sideItem.href = sys.url;
+            sideItem.target = '_blank';
+            sideItem.rel = 'noopener noreferrer';
+            sideItem.className = 'nav-link';
+            sideItem.innerHTML = `
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              <span>${sys.name}</span>
+            `;
+            sidebarList.appendChild(sideItem);
+
+            // Add card to grid
+            const card = document.createElement('div');
+            card.className = 'system-card';
+            card.innerHTML = `
+              <div>
+                <div class="system-card-header">
+                  <div class="system-icon">
+                    <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                  </div>
+                  <div>
+                    <div class="system-category">${sys.category || 'Operations'}</div>
+                    <div class="system-name">${sys.name}</div>
+                  </div>
+                </div>
+                <div class="system-description">${sys.description || 'Enterprise Operational System'}</div>
+              </div>
+              <div class="system-card-footer">
+                <span class="badge badge-active">● Active</span>
+                <a href="${sys.url}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
+                  Open System
+                  <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                </a>
+              </div>
+            `;
+            grid.appendChild(card);
+          });
+        } else {
+          emptyState.style.display = 'block';
+        }
+      } catch (err) {
+        console.error('Failed to load user systems:', err);
+      }
+    })();
+  </script>
+</body>
+</html>
