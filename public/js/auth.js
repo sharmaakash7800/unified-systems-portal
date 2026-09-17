@@ -78,6 +78,49 @@ const Auth = {
     window.location.href = '/index.html';
   },
 
+  async loadBranding() {
+    try {
+      const res = await fetch('/api/organization');
+      const data = await res.json();
+      if (data.success && data.organization) {
+        const org = data.organization;
+        
+        // Update document title if needed
+        if (org.branding?.portalTitle) {
+          document.title = org.branding.portalTitle;
+        }
+
+        // Update CSS custom property for primary color
+        if (org.branding?.primaryColor) {
+          document.documentElement.style.setProperty('--primary', org.branding.primaryColor);
+          document.documentElement.style.setProperty('--primary-dark', org.branding.primaryColor);
+        }
+
+        // Update sidebars
+        document.querySelectorAll('.sidebar-title').forEach(el => {
+          el.textContent = org.name;
+        });
+        
+        document.querySelectorAll('.sidebar-logo-icon').forEach(el => {
+          if (org.logoUrl) {
+            el.innerHTML = `<img src="${org.logoUrl}" alt="${org.shortName}" style="max-width: 100%; max-height: 100%; border-radius: 4px;">`;
+            el.style.background = 'transparent';
+          } else {
+            el.textContent = org.shortName || org.name.charAt(0);
+          }
+        });
+        
+        // Login page brand name
+        const brandNameEl = document.getElementById('brand-name');
+        if (brandNameEl) {
+          brandNameEl.textContent = org.name;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load branding', e);
+    }
+  },
+
   renderUserNav() {
     const user = this.getUser();
     if (!user) return;
@@ -101,3 +144,6 @@ const Auth = {
     }
   }
 };
+
+// Load dynamic organization branding globally
+Auth.loadBranding();
