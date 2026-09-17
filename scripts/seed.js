@@ -103,7 +103,7 @@ async function seed() {
         slug: 'supply-pms',
         description: 'Supply chain, procurement, materials & vendor management operations',
         icon: 'package',
-        url: 'https://supply.example.com', // External URL placeholder / configured deployed PMS URL
+        url: 'https://pms-central-kini.onrender.com/',
         category: 'Procurement & Logistics',
         status: 'active',
         sortOrder: 1,
@@ -114,7 +114,7 @@ async function seed() {
         slug: 'service-pms',
         description: 'Site execution, commissioning, maintenance & field service management',
         icon: 'wrench',
-        url: 'https://service.example.com', // External URL placeholder / configured deployed PMS URL
+        url: 'https://sharmaakash7800.github.io/Service-PMS/',
         category: 'Field Operations',
         status: 'active',
         sortOrder: 2,
