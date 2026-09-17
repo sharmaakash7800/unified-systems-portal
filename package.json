@@ -9,7 +9,12 @@
     "seed": "node scripts/seed.js",
     "test": "node scripts/test-auth.js"
   },
-  "keywords": ["portal", "rbac", "enterprise", "dashboard"],
+  "keywords": [
+    "portal",
+    "rbac",
+    "enterprise",
+    "dashboard"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -21,7 +26,8 @@
     "express-rate-limit": "^7.2.0",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.3.1"
+    "mongoose": "^8.3.1",
+    "nodemailer": "^10.0.10"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

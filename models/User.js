@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const UserSchema = new mongoose.Schema(
   {
@@ -42,6 +43,8 @@ const UserSchema = new mongoose.Schema(
     lastLogin: {
       type: Date,
     },
+    resetPasswordToken: String,
+    resetPasswordExpire: Date,
   },
   { timestamps: true }
 );
@@ -55,6 +58,23 @@ UserSchema.methods.comparePassword = async function (candidatePassword) {
 UserSchema.statics.hashPassword = async function (plainPassword) {
   const salt = await bcrypt.genSalt(10);
   return bcrypt.hash(plainPassword, salt);
+};
+
+// Generate and hash password token
+UserSchema.methods.getResetPasswordToken = function () {
+  // Generate token
+  const resetToken = crypto.randomBytes(20).toString('hex');
+
+  // Hash token and set to resetPasswordToken field
+  this.resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  // Set expire (10 minutes)
+  this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+
+  return resetToken;
 };
 
 module.exports = mongoose.model('User', UserSchema);
