@@ -67,8 +67,9 @@ body {
 }
 
 .sidebar-logo-icon {
-  width: 34px;
+  min-width: 34px;
   height: 34px;
+  padding: 0 8px;
   background: var(--primary);
   border-radius: var(--radius-sm);
   display: flex;
@@ -77,6 +78,7 @@ body {
   color: #ffffff;
   font-weight: 700;
   font-size: 1.1rem;
+  white-space: nowrap;
 }
 
 .sidebar-title {
@@ -500,8 +502,9 @@ tr:hover td {
 }
 
 .login-brand-icon {
-  width: 48px;
+  min-width: 48px;
   height: 48px;
+  padding: 0 12px;
   background-color: var(--primary);
   color: #ffffff;
   display: inline-flex;
@@ -511,6 +514,7 @@ tr:hover td {
   font-weight: 700;
   font-size: 1.4rem;
   margin-bottom: 12px;
+  white-space: nowrap;
 }
 
 .login-title {
