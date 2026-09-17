@@ -131,12 +131,12 @@ async function seed() {
     }
 
     // 4. Default Super Admin User
-    const adminEmail = 'admin@portal.local';
+    const adminEmail = 'akashguru19993@gmail.com';
     let adminUser = await User.findOne({ email: adminEmail });
     if (!adminUser) {
-      const passwordHash = await User.hashPassword('Admin@123456');
+      const passwordHash = await User.hashPassword('admin@993');
       adminUser = await User.create({
-        name: 'Portal Administrator',
+        name: 'Super Admin',
         email: adminEmail,
         passwordHash,
         role: rolesMap['Super Admin']._id,
